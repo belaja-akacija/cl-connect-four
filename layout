@@ -1,0 +1,33 @@
+- Probably don't need classes and objects for this. But write with it anyway just for practise.
+Rewrite a functional style version afterwards, using plists and stuff as data structures.
+
+- Logic:
+While not game over {
+  - Get turn, X goes first.
+    X {
+      - Pick x slot
+      - Check if valid move (is in range and has available slots)
+        - If not, prompt again for another move
+      - check which is last available y slot
+      - make instance of piece. Set turn and position
+      - update board to that location
+      - check if win, if not, go to O player's turn.
+    }
+
+    O {
+      - Same as above
+    }
+}
+
+- Figure out how to check if 4 in a row diagnolly, vertically and horizontally. What are the base cases?
+
+Vertical: check at last placed piece, going down, +1 count for every same piece. Win at count=4.
+
+Horizontal: check at last placed piece, check if left piece the same piece. If so, count how many in a row.
+  If not count = 4, move back to the original piece.
+    Check right, if same piece. If so, count how many in a row.
+    If count != 4, move on to diagnal check.
+
+Diagnal: this one is gonna be the hardest one. Will figure out later.
+
+If all else fails, move on to the next player's turn.
