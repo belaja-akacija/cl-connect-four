@@ -1,32 +1,12 @@
 ;;;; Connect four game implemented in common lisp
 
-;;; Connect four rules:
-;;; 2 players take turns stacking x's and o's on top of other x's and o's
-;;; first to have 4 pieces in a row, diagonally, or on the x or y axis, that player wins
-;;; cannot place piece unless there is a piece directly below it
-;;; cannot move pieces or place in the same cell
-;;;
-;;; have to learn how to store the position of a given x or o
-;;;    - grid[7][7]
-;;;    # # # # # # # 0
-;;;    # # # # # # # 1
-;;;    # # # # # # # 2
-;;;    # # # o x # # 3
-;;;    # # o x o # # 4
-;;;    # o x x o # # 5
-;;;    # o x x x o # 6
-;;;    0 1 2 3 4 5 6
-;;;
-;;; write algorithm that defines the possible legal moves in a given position
-;;; track score
-;;; store turn numbers
-;;; print grid to screen
-;;; define a generic data type for a piece that stores the
-;;;  - x,y position
-;;;  - turn number
-;;;  - wether it's an x or an o
-
 (defparameter *board* (make-array '(7 7) :initial-element '-))
+(defparameter *turn* 0)
+
+(defun update-turn (&optional reset)
+    (if reset
+        (setf *turn* 0)
+        (setf *turn* (1+ *turn*))))
 
 (defun pos (x y)
   "Position of the piece"
@@ -47,40 +27,71 @@
      :initform nil
      :accessor turn)))
 
-(defun make-piece (position type turn)
+(defun make-piece (position type &optional turn)
   "Piece constructor"
   (make-instance 'piece :piece-position position :x-or-o type :turn turn))
 
 (defun show-attributes (piece)
+  "For debugging purposes: show the attributes for any given piece"
   (format t "Position: ~A~%Type: ~A~%Turn: ~A~%" (piece-position piece) (x-or-o piece) (turn piece)))
 
 (defun display-board (board)
+  "Displays the board"
   (dotimes (x 7)
     (dotimes (y 7)
       (if (= y 6)
           (format t "~A~%" (aref board x y))
           (format t "~A " (aref board x y))))))
-(setf (piece-position p1) (pos 1 1))
 
 (defun update-board (board piece)
+  "Update the board position, with the given piece coordinates"
   (setf (aref board (getf (piece-position piece) :y) (getf (piece-position piece) :x)) (x-or-o piece)))
-
-;;; The pieces must fall. Consider choosing only the top slot, then finding out what is the last available space it can go.
 
 (defparameter p2 (make-piece (pos 2 3) 'x))
 
 (defun check-slot (board slot)
+  "Check which slots are available and taken. Output the last available y slot in given x slot or nil"
   (let ((available '()))
-    (loop for x to 6
-         do (if (string= (aref board slot x) "-")
-                (progn
-                  (push x available)
-                  (format t "x:~A y:~A Available~%" slot x))
-                (format t "x:~A y:~A Taken~%" slot x)))
-    (apply #'max available))) ; get the last available y position
+    (if (or (> slot 6) (< slot 0)) ; check if in range
+        (format t "Not in range")
+        (loop for x to 6
+           do (if (string= (aref board x slot) "-")
+                  ;(progn
+                    (push x available)
+                    ;(format t "x:~A y:~A Available~%" slot x))
+                  ;(format t "x:~A y:~A Taken~%" slot x)
+                )))
+    (if available ; if everything taken, return nil
+        (apply #'max available) ; get the last available y position
+        nil)))
 
-(setf (piece-position p2) (pos 0 6))
-(setf (x-or-o p2) 'x)
-(check-slot *board* 1)
-(update-board *board* p2)
+(drop-piece *board* 2)
 (display-board *board*)
+
+(defun drop-piece (board x-slot piece-type)
+  (if (check-slot board x-slot)
+      (progn
+        (setf (piece-position p2) (pos x-slot (check-slot board x-slot)))
+        (setf (x-or-o p2) piece-type)
+        (update-board board p2))
+      (progn
+        (format t "no available moves on this slot")
+        nil)))
+
+(drop-piece *board* 1)
+
+(defun play-turn (turn board)
+  (format t "Choose a slot (1-7)~%~%1 2 3 4 5 6 7~%")
+  (display-board board)
+  (let ((slot (read))
+        (piece-type 'x)
+        (trunc-turn (cadr (multiple-value-list (truncate turn)))))
+    (if (= trunc-turn 0.5)
+        (setf piece-type 'o))
+    (if (null (drop-piece board slot piece-type))
+        (progn
+          (format t "Try again.~%")
+          (play-turn turn board)))
+    (play-turn (+ turn 0.5) board)))
+
+(play-turn *turn* *board*)

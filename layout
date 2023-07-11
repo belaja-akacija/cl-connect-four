@@ -31,3 +31,31 @@ Horizontal: check at last placed piece, check if left piece the same piece. If s
 Diagnal: this one is gonna be the hardest one. Will figure out later.
 
 If all else fails, move on to the next player's turn.
+
+------------------------------------------------------------
+
+;;; Connect four rules:
+;;; 2 players take turns stacking x's and o's on top of other x's and o's
+;;; first to have 4 pieces in a row, diagonally, or on the x or y axis, that player wins
+;;; cannot place piece unless there is a piece directly below it
+;;; cannot move pieces or place in the same cell
+;;;
+;;; have to learn how to store the position of a given x or o
+;;;    - grid[7][7]
+;;;    # # # # # # # 0
+;;;    # # # # # # # 1
+;;;    # # # # # # # 2
+;;;    # # # o x # # 3
+;;;    # # o x o # # 4
+;;;    # o x x o # # 5
+;;;    # o x x x o # 6
+;;;    0 1 2 3 4 5 6
+;;;
+;;; write algorithm that defines the possible legal moves in a given position
+;;; track score
+;;; store turn numbers
+;;; print grid to screen
+;;; define a generic data type for a piece that stores the
+;;;  - x,y position
+;;;  - turn number
+;;;  - wether it's an x or an o
